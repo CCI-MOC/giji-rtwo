@@ -50,6 +50,8 @@ class NetworkManager(object):
             kwargs[u'ex_tenant_name']=kwargs[u'tenant_name']
         if kwargs.has_key(u'auth_url') and not kwargs.has_key(u'ex_force_auth_url'):
             kwargs[u'ex_force_auth_url']=kwargs[u'auth_url']
+        if hasattr(kwargs, 'version'):
+            kwargs['version'] = 'v2.0'
         neutron = _connect_to_neutron(*args, **kwargs)
         return neutron
 

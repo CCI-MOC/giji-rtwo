@@ -22,11 +22,11 @@ from rtwo.exceptions import MissingArgsException, ServiceException
 
 from rtwo.models.provider import AWSProvider
 from rtwo.models.provider import EucaProvider
-from rtwo.models.provider import OSProvider
+from rtwo.models.provider import OSProvider, MockProvider
 
 from rtwo.models.identity import AWSIdentity
 from rtwo.models.identity import EucaIdentity
-from rtwo.models.identity import OSIdentity
+from rtwo.models.identity import OSIdentity, MockIdentity
 
 from rtwo.mixins.driver import APIFilterMixin, MetaMixin,\
     InstanceActionMixin
@@ -221,6 +221,16 @@ class EshDriver(LibcloudDriver, MetaMixin):
                and isinstance(identity, self.identityCls)):
                raise ServiceException('Wrong Provider or Identity')
 
+    def is_valid(self):
+        """
+        Performs validation on the driver -- for most drivers, this will mean you actually have to _call something_ on the API. if it succeeds, the driver is valid.
+        """
+        try:
+            self.list_sizes()
+            return True
+        except:
+            return False
+
     def list_all_volumes(self, *args, **kwargs):
         """
         Return the InstanceClass representation of a libcloud node
@@ -328,6 +338,19 @@ class EshDriver(LibcloudDriver, MetaMixin):
     def detach_volume(self, *args, **kwargs):
         return super(EshDriver, self).detach_volume(*args, **kwargs)
 
+
+class MockDriver(EshDriver, InstanceActionMixin):
+    """
+    """
+    providerCls = MockProvider
+    identityCls = MockIdentity
+
+    def is_valid(self):
+        return True
+
+    def __init__(self, provider, identity, **provider_credentials):
+        super(MockDriver, self).__init__(provider, identity, **provider_credentials)
+        #Set connection && force_service_region
 
 class OSDriver(EshDriver, InstanceActionMixin):
     """
